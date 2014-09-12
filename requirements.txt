@@ -1,0 +1,13 @@
+click==3.3
+ipython==2.2.0
+Jinja2==2.7.3
+matplotlib==1.4.0
+numpy==1.9.0
+pandas==0.14.1
+pygerrit==0.2.4
+Pygments==1.6
+pyzmq==14.3.1
+requests==2.4.1
+retrying==1.2.3
+simplejson==3.6.3
+tornado==4.0.2

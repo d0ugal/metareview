@@ -1,0 +1,13 @@
+*.egg-info
+*.pyc
+*.swp
+.coverage
+.tox
+.vagrant
+.ropeproject
+dist
+tags
+docs/build/*
+*.sublime-*
+presentation.slides.html
+.ipynb_checkpoints

@@ -1,5 +1,7 @@
+from collections import Counter
 from hashlib import md5
 from os import environ, path
+import re
 
 from pygerrit.rest import GerritRestAPI
 from requests.auth import HTTPDigestAuth
@@ -41,6 +43,31 @@ def _filter(hay, needle):
 def _count(hay, needle):
     return len(_filter(hay, needle))
 
+EXTENSIONS = [
+    'py', 'xml', 'json', 'rst', 'html', 'pp', 'txt', 'css', 'js', 'yaml',
+    'conf', 'ini', 'sh', 'rb', 'php'
+]
+
+MESSAGE_PATCH_SET = re.compile(r'^Patch Set (?P<patch_set>\d+):')
+MESSAGE_REVIEW = re.compile(r'Code-Review(?P<review>[\+\-]{1}\d+)')
+MESSAGE_REMOVED = re.compile(r'\-Code-Review')
+MESSAGE_COMMENTS = re.compile(r'\((?P<count>\d+) comment(s)?\)')
+
+
+def _lines_by_lang(rev, key):
+
+    c = Counter()
+
+    for filename, count in rev.get('files', {}).iteritems():
+        extension = filename.rsplit('.', 1)[-1].lower()
+
+        if extension not in EXTENSIONS:
+            extension = 'other'
+
+        c[extension] += count.get(key, 0)
+
+    return c
+
 
 def _lines(rev, key):
     for r in rev.get('files', {}).values():
@@ -49,6 +76,49 @@ def _lines(rev, key):
 
 def _company(email):
     return email.rsplit('@', 1)[-1].lower()
+
+
+def message_to_review(message):
+
+    patch_sets = MESSAGE_PATCH_SET.findall(message)
+    code_reviews = MESSAGE_REVIEW.findall(message)
+    review_removed = MESSAGE_REMOVED.findall(message)
+    comments = MESSAGE_COMMENTS.findall(message)
+
+    try:
+        comments = int(comments[0][0])
+    except IndexError:
+        comments = 0
+
+    if len(code_reviews) == 0 and 'Code-Review' in message and len(review_removed) != 1:
+        return
+
+    if len(patch_sets) == 0:
+        return
+    elif len(patch_sets) > 1:
+        print "1"
+        return
+
+    if len(set(code_reviews)) > 1:
+        print "2"
+        return
+
+    if len(review_removed) > 1:
+        print "3"
+        return
+
+    if len(code_reviews) > 0 and len(review_removed) > 0:
+        print "4"
+        return
+
+    if len(code_reviews) == 1:
+        review = code_reviews[0]
+    elif len(review_removed) == 1:
+        return
+    else:
+        return
+
+    return patch_sets[0], review, comments
 
 
 class StatClient(object):
@@ -117,26 +187,59 @@ class StatClient(object):
 
         if 'Code-Review' in labels:
             cr = labels['Code-Review'].get('all', {})
-            review['Code-Review.+2'] = _count(cr, 2)
-            review['Code-Review.+1'] = _count(cr, 1)
-            review['Code-Review.0'] = _count(cr, 0)
-            review['Code-Review.-1'] = _count(cr, -1)
-            review['Code-Review.-2'] = _count(cr, -2)
+            review['Code-Review.latest.+2'] = _count(cr, 2)
+            review['Code-Review.latest.+1'] = _count(cr, 1)
+            review['Code-Review.latest.0'] = _count(cr, 0)
+            review['Code-Review.latest.-1'] = _count(cr, -1)
+            review['Code-Review.latest.-2'] = _count(cr, -2)
             review['Code-Review.total'] = len(cr)
+
+        for message in messages:
+            set_review = message_to_review(message['message'])
+
+            if set_review is None:
+                continue
+
+            patch_set, review_value, comments = set_review
+
+            set_key = 'Code-Review.%s.%s' % (patch_set, review_value)
+            all_key = 'Code-Review.all.%s' % (review_value, )
+            set_comments = 'Code-Review.%s.comments' % (patch_set, )
+            all_comments = 'Code-Review.all.comments'
+
+            for key in [set_key, all_key, set_comments, all_comments]:
+                if key not in review:
+                    review[key] = 0
+
+            review[set_key] += 1
+            review[all_key] += 1
+            review[set_comments] += comments
+            review[all_comments] += comments
 
         if len(revisions) > 0:
             rev_sort = lambda rev: rev['_number']
             revision = sorted(revisions.values(), key=rev_sort)[-1]
             review['revisions.count'] = revision['_number']
+
             review['revisions.lines_inserted'] = sum(
                 _lines(revision, 'lines_inserted'))
             review['revisions.lines_deleted'] = sum(
                 _lines(revision, 'lines_deleted'))
+
+            for extension, value in _lines_by_lang(
+                    revision, 'lines_inserted').iteritems():
+                review['revisions.lines_inserted.%s' % extension] = value
+            for extension, value in _lines_by_lang(
+                    revision, 'lines_deleted').iteritems():
+                review['revisions.lines_deleted.%s' % extension] = value
+
             review['revisions.lines_total'] = (
                 review['revisions.lines_inserted'] +
                 review['revisions.lines_deleted'])
 
             review['revisions.commit.message'] = revision['commit']['message']
+            review['revisions.commit.message.length'] = len(
+                revision['commit']['message'])
 
             review['owner.tz'] = revision['commit']['author']['tz']
 

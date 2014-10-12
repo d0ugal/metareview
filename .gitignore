@@ -13,3 +13,4 @@ presentation.slides.html
 .ipynb_checkpoints
 openstack-data.csv
 reveal.js
+_cache/*

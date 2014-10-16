@@ -15,13 +15,10 @@ def warm_cache(url):
     Download all of the datas.
     """
     gerrit = Gerrit(verbose=True, url=url)
-    for _ in gerrit.reviews():
+    for i, _ in enumerate(gerrit.reviews()):
         continue
 
-
-@cli.command()
-def clear_cache():
-    pass
+    print "Warmed the cache for %s reviews" % i
 
 
 @cli.command()

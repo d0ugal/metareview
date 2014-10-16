@@ -1,9 +1,10 @@
 from functools import wraps
 from os import path, makedirs
-from hashlib import md5
+from hashlib import sha1
+from string import letters, digits
+
 from simplejson import load, dumps
 from simplejson.scanner import JSONDecodeError
-from string import letters, digits
 
 
 _PATH = path.join(path.abspath(path.dirname(__file__)), '..', '_cache')
@@ -39,11 +40,11 @@ def get_or_call(cache_name, url, func, cache_only=False):
     return result
 
 
-def file_cache(cache_name, load_json=True):
+def file_cache(cache_name):
     def cache_decorator(func):
         @wraps(func)
         def func_wrapper(url):
-            get_or_call(cache_name, url, func)
+            return get_or_call(cache_name, url, func)
         return func_wrapper
     return cache_decorator
 
@@ -93,7 +94,7 @@ def flatten(items, current_path=None):
 
 
 def unique_alphanum(string):
-    digest = str(md5(string).hexdigest())
+    digest = str(sha1(string).hexdigest())[:8]
     alphanum = letters + digits
     string = string.lower()
     cleaned = ''.join(l if l in alphanum else '-' for l in string)

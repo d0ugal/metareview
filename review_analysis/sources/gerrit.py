@@ -1,26 +1,28 @@
-from collections import defaultdict
 from datetime import timedelta
-from os import environ
 from itertools import islice
+from os import environ
 import re
 
 from pandas import DataFrame, to_datetime
 from pygerrit.rest import GerritRestAPI
 from requests.auth import HTTPDigestAuth
+from requests.exceptions import SSLError
 from retrying import retry
 
-from review_analysis.util import get_or_call, CacheMiss, flatten, unique_alphanum
+from review_analysis.util import (get_or_call, CacheMiss, flatten,
+                                  unique_alphanum)
 
 STATUSES = ['merged', 'new', 'submitted', 'abandoned', 'draft']
 
 CHANGES_URL = ("/changes/?q=status:%s"
+               "&o=ALL_COMMITS"
+               "&o=ALL_FILES"
                "&o=ALL_REVISIONS"
                "&o=DETAILED_ACCOUNTS"
-               "&o=ALL_FILES"
-               "&o=ALL_COMMITS"
                "&o=DETAILED_LABELS"
+               "&o=DOWNLOAD_COMMANDS"
                "&o=MESSAGES"
-               "&n=500")
+               "&n=50")
 
 MERGERS = (
     1,  # corvus
@@ -69,7 +71,10 @@ class Gerrit(object):
                           messages_metadata, latest_revision, merged_details,
                           local_times]
 
-    @retry(stop_max_attempt_number=5)
+    @retry(
+        stop_max_attempt_number=5,
+        retry_on_exception=lambda e: isinstance(e, SSLError)
+    )
     def _get(self, url):
         try:
             if self.verbose:
@@ -110,7 +115,7 @@ class Gerrit(object):
         reviews = (dict(flatten(_)) for _ in self.reviews())
 
         if limit is not None:
-            reviews = islice(reviews, limit + 1)
+            reviews = islice(reviews, limit)
 
         df = DataFrame.from_records(reviews)
 
@@ -212,7 +217,13 @@ def messages_metadata(review):
             continue
 
         patch_set, review_value, comments = set_review
-        review['labels']['Code-Review']['all_sets'] = defaultdict(int)
+
+        if 'all_sets' not in review['labels']['Code-Review']:
+            review['labels']['Code-Review']['all_sets'] = {
+                'all': 0, '-2': 0, '-1': 0, '+1': 0, '+2': 0, 'comments': 0,
+            }
+
+        review['labels']['Code-Review']['all_sets']['all'] += 1
         review['labels']['Code-Review']['all_sets'][review_value] += 1
         review['labels']['Code-Review']['all_sets']['comments'] += comments
 
@@ -227,23 +238,26 @@ def latest_revision(review):
         return
 
     revisions = review.pop('revisions')
+
     review['revisions'] = {
         "all": revisions.items()
     }
 
-    rev_sort = lambda rev: rev['_number']
-    latest = sorted(revisions.values(), key=rev_sort)[-1]
-    latest.pop('files')
-    review['revisions']['latest'] = latest
+    rev_sort = lambda rev: rev[1]['_number']
+    sha, latest = sorted(revisions.items(), key=rev_sort)[-1]
 
     totals = {}
     totals['count'] = latest['_number']
 
     totals['lines_inserted'] = sum(_lines(latest, 'lines_inserted'))
     totals['lines_deleted'] = sum(_lines(latest, 'lines_deleted'))
+    latest.pop('files')
+    review['revisions']['latest'] = latest
 
     totals['lines_total'] = (
         totals['lines_inserted'] + totals['lines_deleted'])
+    totals['lines_diff'] = (
+        totals['lines_inserted'] - totals['lines_deleted'])
 
     totals['message'] = latest['commit']['message']
     totals['message.length'] = len(
@@ -273,6 +287,10 @@ def local_times(review):
     delta = timedelta(minutes=review['owner']['tz'])
 
     review['created.local'] = review['created'] + delta
+    review['created.year'] = review['created'].year
+    review['created.month'] = review['created'].month
+    review['created.hour'] = review['created'].hour
+    review['created.local.hour'] = review['created.local'].hour
 
     if 'merged.date' in review:
         review['merged.date'] = to_datetime(review['merged.date'])

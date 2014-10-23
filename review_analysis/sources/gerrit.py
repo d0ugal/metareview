@@ -40,23 +40,12 @@ CI = (
 
 class Gerrit(object):
 
-    def __init__(self, username=None, password=None, url=None,
+    def __init__(self, username, password, url,
                  cache_only=False, verbose=False):
 
-        if username is not None:
-            self.username = username
-        else:
-            self.username = environ.get('GERRIT_USERNAME')
-
-        if password is not None:
-            self.password = password
-        else:
-            self.password = environ.get('GERRIT_PASSWORD')
-
-        if url is None:
-            self.url = 'https://review.openstack.org'
-        else:
-            self.url = url
+        self.username = username
+        self.password = password
+        self.url = url
 
         self._url_key = unique_alphanum(self.url)
 
@@ -128,6 +117,32 @@ class Gerrit(object):
         Rather than return a list of reviews.
         """
 
+
+def create_gerrit_connection(url,
+                             username=None,
+                             password=None,
+                             *args, **kwargs):
+    """Create a new Gerrit connection instance.
+
+    Use this function instead of creating `Gerrit` instances directly.
+
+    If `username` is `None`, the value of the environment variable
+    `GERRIT_USERNAME` is used. If `password` is `None`, the value of
+    the environment variable `GERRIT_PASSWORD` is used.
+
+    All `args` and `kwargs` parameters are passed to the `Gerrit`
+    initializer.
+    """
+    if username is None:
+        username = environ.get('GERRIT_USERNAME')
+
+    if password is None:
+        password = environ.get('GERRIT_PASSWORD')
+
+    return Gerrit(url=url,
+                  username=username,
+                  password=password,
+                  *args, **kwargs)
 
 def project_group(review):
     """

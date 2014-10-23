@@ -1,6 +1,8 @@
+from os import environ
+
 import click
 
-from review_analysis.sources.gerrit import create_gerrit_connection
+from review_analysis.sources.gerrit import Gerrit
 
 
 @click.group()
@@ -8,16 +10,31 @@ def cli():
     pass
 
 
+def common_options(f):
+    """Applies a set of common click argument decorators to the
+    function `f`.
+
+    The arguments are --url, --username, --password, and --verbose.
+    """
+    return reduce(
+        lambda f, d: d(f),
+        (click.option('--url', type=str,
+                      default='https://review.openstack.org'),
+         click.option('--username', type=str,
+                      default=environ.get('GERRIT_USERNAME')),
+         click.option('--password', type=str,
+                      default=environ.get('GERRIT_PASSWORD')),
+         click.option('--verbose', is_flag=True, default=False)),
+        f)
+
+
 @cli.command()
-@click.option('--url', type=str, default='https://review.openstack.org')
-@click.option('--username', type=str, default=None)
-@click.option('--password', type=str, default=None)
-@click.option('--verbose', is_flag=True, default=False)
+@common_options
 def warm_cache(url, username, password, verbose):
     """
     Download all of the datas.
     """
-    gerrit = create_gerrit_connection(
+    gerrit = Gerrit(
         url=url,
         username=username,
         password=password,
@@ -29,13 +46,10 @@ def warm_cache(url, username, password, verbose):
 
 
 @cli.command()
+@common_options
 @click.option('--limit', type=int)
-@click.option('--url', type=str, default='https://review.openstack.org')
-@click.option('--username', type=str, default=None)
-@click.option('--password', type=str, default=None)
-@click.option('--verbose', is_flag=True, default=False)
 def report(limit, url, username, password, verbose):
-    gerrit = create_gerrit_connection(
+    gerrit = Gerrit(
         username=username,
         password=password,
         url=url,

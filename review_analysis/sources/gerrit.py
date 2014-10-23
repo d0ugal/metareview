@@ -1,6 +1,5 @@
 from datetime import timedelta
 from itertools import islice
-from os import environ
 import re
 
 from pandas import DataFrame, to_datetime
@@ -117,32 +116,6 @@ class Gerrit(object):
         Rather than return a list of reviews.
         """
 
-
-def create_gerrit_connection(url,
-                             username=None,
-                             password=None,
-                             *args, **kwargs):
-    """Create a new Gerrit connection instance.
-
-    Use this function instead of creating `Gerrit` instances directly.
-
-    If `username` is `None`, the value of the environment variable
-    `GERRIT_USERNAME` is used. If `password` is `None`, the value of
-    the environment variable `GERRIT_PASSWORD` is used.
-
-    All `args` and `kwargs` parameters are passed to the `Gerrit`
-    initializer.
-    """
-    if username is None:
-        username = environ.get('GERRIT_USERNAME')
-
-    if password is None:
-        password = environ.get('GERRIT_PASSWORD')
-
-    return Gerrit(url=url,
-                  username=username,
-                  password=password,
-                  *args, **kwargs)
 
 def project_group(review):
     """

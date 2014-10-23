@@ -1,6 +1,5 @@
 from datetime import timedelta
 from itertools import islice
-from os import environ
 import re
 
 from pandas import DataFrame, to_datetime
@@ -40,23 +39,12 @@ CI = (
 
 class Gerrit(object):
 
-    def __init__(self, username=None, password=None, url=None,
+    def __init__(self, username, password, url,
                  cache_only=False, verbose=False):
 
-        if username is not None:
-            self.username = username
-        else:
-            self.username = environ.get('GERRIT_USERNAME')
-
-        if password is not None:
-            self.password = password
-        else:
-            self.password = environ.get('GERRIT_PASSWORD')
-
-        if url is None:
-            self.url = 'https://review.openstack.org'
-        else:
-            self.url = url
+        self.username = username
+        self.password = password
+        self.url = url
 
         self._url_key = unique_alphanum(self.url)
 

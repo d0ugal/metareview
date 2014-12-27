@@ -1,4 +1,4 @@
-from .base import Result
+from .base import Result, ReportCollection
 
 
 def number_of_reviews(df):
@@ -12,3 +12,7 @@ def number_of_reviews(df):
         by_reviews['created'].count(),
         kind='bar'
     )
+
+ReportCollection('general').add_many({
+    'number_of_reviews': number_of_reviews,
+})

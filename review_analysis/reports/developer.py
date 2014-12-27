@@ -1,7 +1,7 @@
 from functools import partial as _partial
 import numpy as _np
 
-from .base import Result
+from .base import Result, ReportCollection
 
 
 def rating(df, minimum_reviews=25):
@@ -56,3 +56,8 @@ def number_of_timezones(df):
         tz_count.to_frame(),
         plot=_partial(tz_count.head().plot, kind='bar')
     )
+
+ReportCollection('developer').add_many({
+    'rating': rating,
+    'number_of_timezones': number_of_timezones
+})

@@ -2,6 +2,7 @@ from os import environ
 
 import click
 
+from review_analysis.reports import get_collections
 from review_analysis.sources.gerrit import Gerrit
 
 
@@ -46,15 +47,32 @@ def warm_cache(url, username, password, verbose):
 
 
 @cli.command()
-@common_options
+@click.option('--url', type=str)
 @click.option('--limit', type=int)
-def report(limit, url, username, password, verbose):
-    gerrit = Gerrit(
-        username=username,
-        password=password,
-        url=url,
-        verbose=verbose)
+@click.option('--cache-only', is_flag=True, default=False)
+def report(url, limit, cache_only):
+
+    gerrit = Gerrit(cache_only=cache_only, verbose=True, url=url)
 
     df = gerrit.as_dataframe(limit)
 
-    print df
+    for collection in get_collections():
+
+        markdown = open('docs/reports/{0}.md'.format(collection.name), 'w')
+        markdown.write('# {0}\n\n'.format(collection.name))
+
+        for name, report in collection.reports.items():
+            markdown.write('## {0}\n\n{1}\n\n'.format(
+                name, getattr(report, 'func_doc', '')))
+            try:
+                print 'START: {0}:{1}'.format(collection.name, name), ' ... ',
+                result = report(df)
+                f = result.plot().get_figure()
+                path = 'docs/images/{0}.{1}.png'.format(collection.name, name)
+                f.savefig(path)
+                markdown.write('![{0}]({1})\n\n'.format(path, path[4:]))
+                print 'DONE'
+            except Exception:
+                print 'FAIL'
+
+        markdown.close()

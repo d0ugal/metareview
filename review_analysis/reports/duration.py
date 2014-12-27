@@ -2,7 +2,7 @@ from functools import partial as _partial
 
 import numpy as _np
 
-from .base import Result
+from .base import Result, ReportCollection
 
 
 def _duration(groupby, at_least, df):
@@ -21,3 +21,11 @@ project = _partial(_duration, ['project'], 100)
 project_group = _partial(_duration, ['project.group'], 0)
 submitted_hour = _partial(_duration, ['created.hour'], 0)
 submitted_hour_local = _partial(_duration, ['created.local.hour'], 0)
+
+ReportCollection('duration').add_many({
+    'developer': developer,
+    'project': project,
+    'project_group': project_group,
+    'submitted_hour': submitted_hour,
+    'submitted_hour_local': submitted_hour_local,
+})

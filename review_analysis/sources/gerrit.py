@@ -21,7 +21,7 @@ CHANGES_URL = ("/changes/?q=status:%s"
                "&o=DETAILED_LABELS"
                "&o=DOWNLOAD_COMMANDS"
                "&o=MESSAGES"
-               "&n=50")
+               "&n=100")
 
 MERGERS = (
     1,  # corvus

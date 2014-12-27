@@ -1,0 +1,16 @@
+site_name: Review Analysis
+site_description: Data analysis of code review data
+repo_url: https://github.com/d0ugal/review_analysis/
+
+pages:
+- ['index.md', 'Home']
+- ['reports/comments.md', 'Reports', 'Comments']
+- ['reports/developer.md', 'Reports', 'Developer']
+- ['reports/duration.md', 'Reports', 'Duration']
+- ['reports/general.md', 'Reports', 'General']
+- ['reports/sloc.md', 'Reports', 'SLOC']
+- ['reports/timezones.md', 'Reports', 'Timezones']
+
+theme: readthedocs
+
+copyright: Copyright &copy; 2014, <a href="https://twitter.com/d0ugal">Dougal Matthews</a>.

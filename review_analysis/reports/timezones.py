@@ -1,4 +1,4 @@
-from .base import Result
+from .base import Result, ReportCollection
 
 
 def spread(df):
@@ -9,3 +9,7 @@ def spread(df):
         counts_by_hour['owner._account_id'].count(),
         kind='bar'
     )
+
+ReportCollection('timezones').add_many({
+    'spread': spread,
+})

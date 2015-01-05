@@ -10,6 +10,7 @@ def spread(df):
         kind='bar'
     )
 
-ReportCollection('timezones').add_many({
-    'spread': spread,
-})
+ReportCollection('timezones', [
+    'owner.tz',
+    'owner._account_id',
+]).add('spread', spread)

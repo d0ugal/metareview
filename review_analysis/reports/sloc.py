@@ -35,9 +35,18 @@ size_vs_commit_message = _partial(_size_vs, 'revisions.totals.message.length')
 size_vs_comment_count = _partial(
     _size_vs, 'labels.Code-Review.all_sets.comments')
 
-ReportCollection('sloc').add_many({
-    'size_vs_reviews': size_vs_reviews,
-    'size_vs_hour': size_vs_hour,
-    'size_vs_commit_message': size_vs_commit_message,
-    'size_vs_comment_count': size_vs_comment_count,
-})
+ReportCollection('sloc', [
+    'revisions.totals.lines_diff',
+    'revisions.totals.lines_total',
+    'revisions.totals.lines_inserted',
+    'revisions.totals.lines_deleted',
+    'labels.Code-Review.all_sets.all',
+    'created.local.hour',
+    'revisions.totals.message.length',
+    'labels.Code-Review.all_sets.comments',
+]).add_many((
+    ('size_vs_reviews', size_vs_reviews),
+    ('size_vs_hour', size_vs_hour),
+    ('size_vs_commit_message', size_vs_commit_message),
+    ('size_vs_comment_count', size_vs_comment_count),
+))

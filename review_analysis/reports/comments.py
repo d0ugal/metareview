@@ -19,9 +19,16 @@ review_minus1 = _partial(_comment_tone, '-1',)
 review_minus2 = _partial(_comment_tone, '-2',)
 
 
-ReportCollection('comments').add_many({
-    'review_plus2': review_plus2,
-    'review_plus1': review_plus1,
-    'review_minus1': review_minus1,
-    'review_minus2': review_minus2,
-})
+ReportCollection('comments', [
+    '_number',
+    'labels.Code-Review.all_sets.comments',
+    'labels.Code-Review.all_sets.+2',
+    'labels.Code-Review.all_sets.+1',
+    'labels.Code-Review.all_sets.-1',
+    'labels.Code-Review.all_sets.-2',
+]).add_many((
+    ('review_plus2', review_plus2),
+    ('review_plus1', review_plus1),
+    ('review_minus1', review_minus1),
+    ('review_minus2', review_minus2),
+))

@@ -1,3 +1,6 @@
+from collections import OrderedDict
+
+
 class Result(object):
 
     def __init__(self, df, plot=None, **plot_args):
@@ -21,9 +24,10 @@ _collections = []
 
 class ReportCollection(object):
 
-    def __init__(self, name):
+    def __init__(self, name, keys=None):
         self.name = name
-        self.reports = {}
+        self.required_keys = keys
+        self.reports = OrderedDict()
         _collections.append(self)
 
     def add(self, name, reporter):
@@ -34,7 +38,7 @@ class ReportCollection(object):
         self.reports[name] = reporter
 
     def add_many(self, reporters):
-        for name, reporter in reporters.items():
+        for name, reporter in reporters:
             self.add(name, reporter)
 
 

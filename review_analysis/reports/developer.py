@@ -57,7 +57,15 @@ def number_of_timezones(df):
         plot=_partial(tz_count.head().plot, kind='bar')
     )
 
-ReportCollection('developer').add_many({
-    'rating': rating,
-    'number_of_timezones': number_of_timezones
-})
+ReportCollection('developer', [
+    'owner._account_id',
+    'owner.tz',
+    'labels.Code-Review.all_sets.all',
+    'labels.Code-Review.all_sets.-2',
+    'labels.Code-Review.all_sets.-1',
+    'labels.Code-Review.all_sets.+1',
+    'labels.Code-Review.all_sets.+2',
+]).add_many((
+    ('rating', rating),
+    ('number_of_timezones', number_of_timezones)
+))

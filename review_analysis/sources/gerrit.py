@@ -77,6 +77,13 @@ class Gerrit(object):
             modifier(review)
         return review
 
+    def select_keys(self, review, keys):
+
+        if keys is None:
+            return review
+
+        return {key: review.get(key) for key in keys}
+
     def reviews(self):
 
         for status in STATUSES:
@@ -98,9 +105,14 @@ class Gerrit(object):
                 else:
                     url = None
 
-    def as_dataframe(self, limit=None):
+    def as_dataframe(self, limit=None, keys=None):
 
-        reviews = (dict(flatten(_)) for _ in self.reviews())
+        if keys is not None:
+            keys = set(keys)
+            keys.add('_number')
+
+        reviews = (self.select_keys(dict(flatten(_)), keys)
+                   for _ in self.reviews())
 
         if limit is not None:
             reviews = islice(reviews, limit)

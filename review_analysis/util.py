@@ -2,6 +2,7 @@ from functools import wraps
 from os import path, makedirs
 from hashlib import sha1
 from string import letters, digits
+from textwrap import dedent as tw_dedent
 
 from simplejson import load, dumps
 from simplejson.scanner import JSONDecodeError
@@ -99,3 +100,9 @@ def unique_alphanum(string):
     string = string.lower()
     cleaned = ''.join(l if l in alphanum else '-' for l in string)
     return "%s-%s" % (digest, cleaned)
+
+
+def dedent(text):
+    if text is None:
+        return
+    return tw_dedent(text).strip()

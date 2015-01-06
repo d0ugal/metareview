@@ -4,13 +4,7 @@
 .coverage
 .tox
 .vagrant
-.ropeproject
 dist
 tags
-docs/build/*
-*.sublime-*
-presentation.slides.html
-.ipynb_checkpoints
-openstack-data.csv
-reveal.js
 _cache/*
+site/

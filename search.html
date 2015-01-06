@@ -56,25 +56,8 @@
       <ul class="current">
     
         
-            <li class="toctree-l1 current">
-                <a class="current" href=".">Home</a>
-                
-                    <ul>
-                    
-                        <li class="toctree-l3"><a href="#review-analysis">Review Analysis</a></li>
-                        
-                    
-                        <li class="toctree-l3"><a href="#install">Install</a></li>
-                        
-                    
-                        <li class="toctree-l3"><a href="#usage">Usage</a></li>
-                        
-                            <li><a class="toctree-l4" href="#first-time-setup">First time setup</a></li>
-                        
-                            <li><a class="toctree-l4" href="#viewing-the-data">Viewing the data</a></li>
-                        
-                    
-                    </ul>
+            <li class="toctree-l1 ">
+                <a class="" href=".">Home</a>
                 
             </li>
         
@@ -136,7 +119,7 @@
           <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href=".">Docs</a> &raquo;</li>
-    <li>Home</li>
+    
     <li class="wy-breadcrumbs-aside">
       
         
@@ -150,58 +133,22 @@
           <div role="main">
             <div class="section">
               
-                <h1 id="review-analysis">Review Analysis</h1>
-<p>Review Analysis is a project for analysing code review data to
-look find interesting data and create pretty graphs.</p>
-<p>This project is under heavy development and currently rough
-around the edges. Pull requests are more than welcome. At the
-moment we only look at all the projects under the OpenStack
-gerrit review data.</p>
-<h1 id="install">Install</h1>
-<p>This currently requires a few steps at the moment.</p>
-<pre><code class="bash">git clone https://github.com/d0ugal/review_analysis.git;
-cd mkdocs;
-pip install -r requirements.txt;
-python setup.py install;
-</code></pre>
 
-<h1 id="usage">Usage</h1>
-<h2 id="first-time-setup">First time setup</h2>
-<p>First you will need some data to work with. At the moment we
-currently only support the OpenStack deployment of Gerrit which
-has over 140,000 reviews. You will need to create <a href="https://review.openstack.org/#/">an
-account</a> and take note of the
-username and password under <code>HTTP Password</code> in the settings.</p>
-<p>After you do this, you will need to follow these steps to fetch
-the data.</p>
-<pre><code class="bash">export GERRIT_USERNAME=$USERNAME;
-export GERRIT_PASSWORD=$PASSWORD;
-review_analaysis warm_cache;
-</code></pre>
+  <h1 id="search">Search Results</h1>
 
-<p>This will download around 5.3 Gb of JSON and store it under a
-<code>_cache</code>. After this is finished (it will take a while) you are
-set to examine the data. The cache doesn't invalidate and needs
-to be manually busted by deleting the <code>_cache</code> directory.</p>
-<h2 id="viewing-the-data">Viewing the data</h2>
-<p>After you have all the data, run the following command:</p>
-<pre><code class="bash">review_analaysis report;
-mkdocs serve;
-</code></pre>
+  <form id="content_search" action="search.html">
+    <span role="status" aria-live="polite" class="ui-helper-hidden-accessible"></span>
+    <input name="q" id="tipue_search_input" type="text" class="search_input search-query ui-autocomplete-input" placeholder="Search the Docs" autocomplete="off">
+  </form>
 
-<p>Then go to <code>localhost:8000</code> in your browser to see the data.</p>
+  <div id="tipue_search_content">
+    Sorry, page not found.
+  </div>
 
-              
+
             </div>
           </div>
           <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="reports/comments/" class="btn btn-neutral float-right" title="Comments"/>Next <span class="icon icon-circle-arrow-right"></span></a>
-      
-      
-    </div>
   
 
   <hr/>
@@ -228,8 +175,6 @@ mkdocs serve;
           <a class="icon icon-github" style="float: left; color: #fcfcfc"> GitHub</a>
       
       
-      
-        <span style="margin-left: 15px"><a href="reports/comments/" style="color: #fcfcfc">Next &raquo;</a></span>
       
     </span>
 </div>

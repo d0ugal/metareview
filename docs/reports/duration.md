@@ -1,32 +1,26 @@
-# duration
+# Duration
 
-## developer
+## The fastest developer
 
+None
 
+![docs/images/Duration.the-fastest-developer.png](/images/Duration.the-fastest-developer.png)
 
-![docs/images/duration.developer.png](/images/duration.developer.png)
+## The fastest project
 
-## project
+None
 
+![docs/images/Duration.the-fastest-project.png](/images/Duration.the-fastest-project.png)
 
+## The fastest Project Group
 
-![docs/images/duration.project.png](/images/duration.project.png)
+None
 
-## project_group
+![docs/images/Duration.the-fastest-project-group.png](/images/Duration.the-fastest-project-group.png)
 
+## The fastest hour (UTC)
 
+None
 
-![docs/images/duration.project_group.png](/images/duration.project_group.png)
-
-## submitted_hour
-
-
-
-![docs/images/duration.submitted_hour.png](/images/duration.submitted_hour.png)
-
-## submitted_hour_local
-
-
-
-![docs/images/duration.submitted_hour_local.png](/images/duration.submitted_hour_local.png)
+![docs/images/Duration.the-fastest-hour-utc.png](/images/Duration.the-fastest-hour-utc.png)
 

@@ -1,4 +1,4 @@
-from functools import partial as _partial
+from functools import partial
 
 
 from .base import Result, ReportCollection
@@ -29,10 +29,10 @@ def _size_vs(vs, df, line_count='lines_diff', limit=10000):
     )
 
 
-size_vs_reviews = _partial(_size_vs, 'labels.Code-Review.all_sets.all')
-size_vs_hour = _partial(_size_vs, 'created.local.hour')
-size_vs_commit_message = _partial(_size_vs, 'revisions.totals.message.length')
-size_vs_comment_count = _partial(
+size_vs_reviews = partial(_size_vs, 'labels.Code-Review.all_sets.all')
+size_vs_hour = partial(_size_vs, 'created.local.hour')
+size_vs_commit_message = partial(_size_vs, 'revisions.totals.message.length')
+size_vs_comment_count = partial(
     _size_vs, 'labels.Code-Review.all_sets.comments')
 
 ReportCollection('sloc', [

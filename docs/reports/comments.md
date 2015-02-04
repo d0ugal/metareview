@@ -1,26 +1,26 @@
-# comments
+# Comments
 
-## review_plus2
+## No. comments vs the no. +2's
 
+None
 
+![docs/images/Comments.no-comments-vs-the-no-2s.png](/images/Comments.no-comments-vs-the-no-2s.png)
 
-![docs/images/comments.review_plus2.png](/images/comments.review_plus2.png)
+## No. comments vs the no. +1's
 
-## review_plus1
+None
 
+![docs/images/Comments.no-comments-vs-the-no-1s.png](/images/Comments.no-comments-vs-the-no-1s.png)
 
+## No. comments vs the no. -1's
 
-![docs/images/comments.review_plus1.png](/images/comments.review_plus1.png)
+None
 
-## review_minus1
+![docs/images/Comments.no-comments-vs-the-no-1s.png](/images/Comments.no-comments-vs-the-no-1s.png)
 
+## No. comments vs the no. -2's
 
+None
 
-![docs/images/comments.review_minus1.png](/images/comments.review_minus1.png)
-
-## review_minus2
-
-
-
-![docs/images/comments.review_minus2.png](/images/comments.review_minus2.png)
+![docs/images/Comments.no-comments-vs-the-no-2s.png](/images/Comments.no-comments-vs-the-no-2s.png)
 

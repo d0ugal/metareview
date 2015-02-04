@@ -1,4 +1,4 @@
-from functools import partial as _partial
+from functools import partial
 
 import numpy as _np
 
@@ -19,13 +19,13 @@ def _duration(groupby, df, top=True):
     return Result(speed, kind='bar')
 
 
-developer = _partial(_duration, ['owner._account_id'])
-project = _partial(_duration, ['project'])
-project_group = _partial(_duration, ['project.group'])
-submitted_hour = _partial(_duration, ['created.hour'], top=False)
-submitted_hour_local = _partial(_duration, ['created.local.hour'], top=False)
+developer = partial(_duration, ['owner._account_id'])
+project = partial(_duration, ['project'])
+project_group = partial(_duration, ['project.group'])
+submitted_hour = partial(_duration, ['created.hour'], top=False)
+submitted_hour = partial(_duration, ['created.hour'])
 
-ReportCollection('duration', [
+ReportCollection('Duration', [
     'status',
     'review_duration',
     'owner._account_id',
@@ -34,9 +34,8 @@ ReportCollection('duration', [
     'created.hour',
     'created.local.hour',
 ]).add_many((
-    ('developer', developer),
-    ('project', project),
-    ('project_group', project_group),
-    ('submitted_hour', submitted_hour),
-    ('submitted_hour_local', submitted_hour_local),
+    ('The fastest developer', developer),
+    ('The fastest project', project),
+    ('The fastest Project Group', project_group),
+    ('The fastest hour (UTC)', submitted_hour),
 ))

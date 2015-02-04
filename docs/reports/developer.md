@@ -1,17 +1,14 @@
 # developer
 
-## rating
+## Developer rating
 
-Given the data frame, group by owner._account_id and
-aggregate the number the reviews they have received. Sort
-the results to show reviewers with the most overall reviews.
+None
 
-![docs/images/developer.rating.png](/images/developer.rating.png)
+![docs/images/developer.developer-rating.png](/images/developer.developer-rating.png)
 
-## number_of_timezones
+## Developers with the most timezones
 
-Find the developers with reviews submitted from the most
-different timezones.
+None
 
-![docs/images/developer.number_of_timezones.png](/images/developer.number_of_timezones.png)
+![docs/images/developer.developers-with-the-most-timezones.png](/images/developer.developers-with-the-most-timezones.png)
 

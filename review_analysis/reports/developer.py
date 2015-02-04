@@ -1,4 +1,4 @@
-from functools import partial as _partial
+from functools import partial
 import numpy as _np
 
 from .base import Result, ReportCollection
@@ -54,7 +54,7 @@ def number_of_timezones(df):
 
     return Result(
         tz_count.to_frame(),
-        plot=_partial(tz_count.head().plot, kind='bar')
+        plot=partial(tz_count.head().plot, kind='bar')
     )
 
 ReportCollection('developer', [
@@ -66,6 +66,6 @@ ReportCollection('developer', [
     'labels.Code-Review.all_sets.+1',
     'labels.Code-Review.all_sets.+2',
 ]).add_many((
-    ('rating', rating),
-    ('number_of_timezones', number_of_timezones)
+    ("Developer rating", rating),
+    ("Developers with the most timezones", number_of_timezones)
 ))

@@ -12,5 +12,5 @@ pages:
 - ['reports/timezones.md', 'Reports', 'Timezones']
 
 theme: readthedocs
-
+include_search: true
 copyright: Copyright &copy; 2014, <a href="https://twitter.com/d0ugal">Dougal Matthews</a>.

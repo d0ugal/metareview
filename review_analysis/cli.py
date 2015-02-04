@@ -50,8 +50,12 @@ def warm_cache(url, username, password, verbose):
 @cli.command()
 @common_options
 @click.option('--limit', type=int)
-@click.option('--cache-only', is_flag=True, default=False)
-def report(url, username, password, verbose, limit, cache_only):
+@click.option('--collection', type=str, default=None)
+@click.option('--cache-only', is_flag=True, default=True)
+def report(url, username, password, verbose, limit, collection, cache_only):
+
+    if cache_only:
+        print 'Only using JSON already in the cache.'
 
     gerrit = Gerrit(
         cache_only=cache_only,
@@ -60,21 +64,24 @@ def report(url, username, password, verbose, limit, cache_only):
         username=username,
         verbose=verbose)
 
-    for collection in get_collections():
+    for c in get_collections():
 
-        df = gerrit.as_dataframe(limit, keys=collection.required_keys)
+        if collection is not None and c.name != collection:
+            continue
 
-        markdown = open('docs/reports/{0}.md'.format(collection.name), 'w')
-        markdown.write('# {0}\n\n'.format(collection.name))
+        df = gerrit.as_dataframe(limit, keys=c.required_keys)
 
-        for name, report in collection.reports.items():
+        markdown = open('docs/reports/{0}.md'.format(c.slug), 'w')
+        markdown.write('# {0}\n\n'.format(c.name))
+
+        for name, report in c.reports.items():
             markdown.write('## {0}\n\n{1}\n\n'.format(
-                name, dedent(getattr(report, 'func_doc', ''))))
+                name, dedent(getattr(report, '__doc__', ''))))
             try:
-                print 'START: {0}:{1}'.format(collection.name, name), ' ... ',
+                print 'START: {0}:{1}'.format(c.name, report.slug), ' ... ',
                 result = report(df)
                 f = result.plot().get_figure()
-                path = 'docs/images/{0}.{1}.png'.format(collection.name, name)
+                path = 'docs/images/{0}.{1}.png'.format(c.name, report.slug)
                 f.savefig(path)
                 markdown.write('![{0}]({1})\n\n'.format(path, path[4:]))
                 print 'DONE'

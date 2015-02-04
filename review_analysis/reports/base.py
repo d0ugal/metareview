@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from slugify import slugify
 
 
 class Result(object):
@@ -22,10 +23,21 @@ class Result(object):
 _collections = []
 
 
+class Report(object):
+    def __init__(self, name, callable_):
+        self.name = name
+        self.slug = slugify(name.lower())
+        self.callable = callable_
+
+    def __call__(self, *args, **kwargs):
+        return self.callable(*args, **kwargs)
+
+
 class ReportCollection(object):
 
     def __init__(self, name, keys=None):
         self.name = name
+        self.slug = slugify(name.lower())
         self.required_keys = keys
         self.reports = OrderedDict()
         _collections.append(self)
@@ -35,7 +47,7 @@ class ReportCollection(object):
         if self.name in self.reports:
             raise ValueError("Name '{0}' already in use.".format(name))
 
-        self.reports[name] = reporter
+        self.reports[name] = Report(name, reporter)
 
     def add_many(self, reporters):
         for name, reporter in reporters:

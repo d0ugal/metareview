@@ -39,43 +39,43 @@ var tipuesearch = {
         {
             "loc": "/reports/comments/", 
             "tags": "", 
-            "text": "comments\n\n\nreview_plus2\n\n\n\n\nreview_plus1\n\n\n\n\nreview_minus1\n\n\n\n\nreview_minus2", 
+            "text": "Comments\n\n\nNo. comments vs the no. +2's\n\n\nNone\n\n\n\n\nNo. comments vs the no. +1's\n\n\nNone\n\n\n\n\nNo. comments vs the no. -1's\n\n\nNone\n\n\n\n\nNo. comments vs the no. -2's\n\n\nNone", 
             "title": "Comments"
         }, 
         {
             "loc": "/reports/comments/#comments", 
             "tags": "", 
             "text": "", 
-            "title": "comments"
+            "title": "Comments"
         }, 
         {
-            "loc": "/reports/comments/#review_plus2", 
+            "loc": "/reports/comments/#no-comments-vs-the-no-2s", 
             "tags": "", 
-            "text": "", 
-            "title": "review_plus2"
+            "text": "None", 
+            "title": "No. comments vs the no. +2's"
         }, 
         {
-            "loc": "/reports/comments/#review_plus1", 
+            "loc": "/reports/comments/#no-comments-vs-the-no-1s", 
             "tags": "", 
-            "text": "", 
-            "title": "review_plus1"
+            "text": "None", 
+            "title": "No. comments vs the no. +1's"
         }, 
         {
-            "loc": "/reports/comments/#review_minus1", 
+            "loc": "/reports/comments/#no-comments-vs-the-no-1s_1", 
             "tags": "", 
-            "text": "", 
-            "title": "review_minus1"
+            "text": "None", 
+            "title": "No. comments vs the no. -1's"
         }, 
         {
-            "loc": "/reports/comments/#review_minus2", 
+            "loc": "/reports/comments/#no-comments-vs-the-no-2s_1", 
             "tags": "", 
-            "text": "", 
-            "title": "review_minus2"
+            "text": "None", 
+            "title": "No. comments vs the no. -2's"
         }, 
         {
             "loc": "/reports/developer/", 
             "tags": "", 
-            "text": "developer\n\n\nrating\n\n\nGiven the data frame, group by owner._account_id and\naggregate the number the reviews they have received. Sort\nthe results to show reviewers with the most overall reviews.\n\n\n\n\nnumber_of_timezones\n\n\nFind the developers with reviews submitted from the most\ndifferent timezones.", 
+            "text": "developer\n\n\nDeveloper rating\n\n\nNone\n\n\n\n\nDevelopers with the most timezones\n\n\nNone", 
             "title": "Developer"
         }, 
         {
@@ -85,63 +85,57 @@ var tipuesearch = {
             "title": "developer"
         }, 
         {
-            "loc": "/reports/developer/#rating", 
+            "loc": "/reports/developer/#developer-rating", 
             "tags": "", 
-            "text": "Given the data frame, group by owner._account_id and\naggregate the number the reviews they have received. Sort\nthe results to show reviewers with the most overall reviews.", 
-            "title": "rating"
+            "text": "None", 
+            "title": "Developer rating"
         }, 
         {
-            "loc": "/reports/developer/#number_of_timezones", 
+            "loc": "/reports/developer/#developers-with-the-most-timezones", 
             "tags": "", 
-            "text": "Find the developers with reviews submitted from the most\ndifferent timezones.", 
-            "title": "number_of_timezones"
+            "text": "None", 
+            "title": "Developers with the most timezones"
         }, 
         {
             "loc": "/reports/duration/", 
             "tags": "", 
-            "text": "duration\n\n\ndeveloper\n\n\n\n\nproject\n\n\n\n\nproject_group\n\n\n\n\nsubmitted_hour\n\n\n\n\nsubmitted_hour_local", 
+            "text": "Duration\n\n\nThe fastest developer\n\n\nNone\n\n\n\n\nThe fastest project\n\n\nNone\n\n\n\n\nThe fastest Project Group\n\n\nNone\n\n\n\n\nThe fastest hour (UTC)\n\n\nNone", 
             "title": "Duration"
         }, 
         {
             "loc": "/reports/duration/#duration", 
             "tags": "", 
             "text": "", 
-            "title": "duration"
+            "title": "Duration"
         }, 
         {
-            "loc": "/reports/duration/#developer", 
+            "loc": "/reports/duration/#the-fastest-developer", 
             "tags": "", 
-            "text": "", 
-            "title": "developer"
+            "text": "None", 
+            "title": "The fastest developer"
         }, 
         {
-            "loc": "/reports/duration/#project", 
+            "loc": "/reports/duration/#the-fastest-project", 
             "tags": "", 
-            "text": "", 
-            "title": "project"
+            "text": "None", 
+            "title": "The fastest project"
         }, 
         {
-            "loc": "/reports/duration/#project_group", 
+            "loc": "/reports/duration/#the-fastest-project-group", 
             "tags": "", 
-            "text": "", 
-            "title": "project_group"
+            "text": "None", 
+            "title": "The fastest Project Group"
         }, 
         {
-            "loc": "/reports/duration/#submitted_hour", 
+            "loc": "/reports/duration/#the-fastest-hour-utc", 
             "tags": "", 
-            "text": "", 
-            "title": "submitted_hour"
-        }, 
-        {
-            "loc": "/reports/duration/#submitted_hour_local", 
-            "tags": "", 
-            "text": "", 
-            "title": "submitted_hour_local"
+            "text": "None", 
+            "title": "The fastest hour (UTC)"
         }, 
         {
             "loc": "/reports/general/", 
             "tags": "", 
-            "text": "general\n\n\nnumber_of_reviews\n\n\nGiven a data frame, group by the number of reviewers that\nhave reviewed this patch and return the grouped count.", 
+            "text": "general\n\n\nnumber_of_reviews\n\n\nNone", 
             "title": "General"
         }, 
         {
@@ -153,13 +147,13 @@ var tipuesearch = {
         {
             "loc": "/reports/general/#number_of_reviews", 
             "tags": "", 
-            "text": "Given a data frame, group by the number of reviewers that\nhave reviewed this patch and return the grouped count.", 
+            "text": "None", 
             "title": "number_of_reviews"
         }, 
         {
             "loc": "/reports/sloc/", 
             "tags": "", 
-            "text": "sloc\n\n\nsize_vs_reviews\n\n\n\n\nsize_vs_hour\n\n\n\n\nsize_vs_commit_message\n\n\n\n\nsize_vs_comment_count", 
+            "text": "sloc\n\n\nsize_vs_reviews\n\n\nNone\n\n\n\n\nsize_vs_hour\n\n\nNone\n\n\n\n\nsize_vs_commit_message\n\n\nNone\n\n\n\n\nsize_vs_comment_count\n\n\nNone", 
             "title": "SLOC"
         }, 
         {
@@ -171,25 +165,25 @@ var tipuesearch = {
         {
             "loc": "/reports/sloc/#size_vs_reviews", 
             "tags": "", 
-            "text": "", 
+            "text": "None", 
             "title": "size_vs_reviews"
         }, 
         {
             "loc": "/reports/sloc/#size_vs_hour", 
             "tags": "", 
-            "text": "", 
+            "text": "None", 
             "title": "size_vs_hour"
         }, 
         {
             "loc": "/reports/sloc/#size_vs_commit_message", 
             "tags": "", 
-            "text": "", 
+            "text": "None", 
             "title": "size_vs_commit_message"
         }, 
         {
             "loc": "/reports/sloc/#size_vs_comment_count", 
             "tags": "", 
-            "text": "", 
+            "text": "None", 
             "title": "size_vs_comment_count"
         }, 
         {

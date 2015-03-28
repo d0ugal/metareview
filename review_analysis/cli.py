@@ -81,7 +81,7 @@ set -x;
     print "curl -XDELETE 'http://{0}:9200/_all';".format(ip)
     print "curl -XDELETE 'http://{0}:9200/review/_mapping';".format(ip)
 
-    batch_size = 500
+    batch_size = 1000
 
     for i, review in enumerate(reviews):
 
@@ -92,10 +92,6 @@ set -x;
             outf = open(path, 'wa')
             print "curl -s -XPOST {0}:9200/_bulk --data-binary @{1};".format(
                 ip, outf.name)
-
-        if i % 2000 == 0:
-            print "sleep 10;"
-            print "curl -XPOST 'http://{0}:9200/review/_optimize';".format(ip)
 
         if i == limit:
             break

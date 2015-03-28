@@ -1,11 +1,8 @@
-from functools import wraps
 from os import path, makedirs
 from hashlib import sha1
 from string import letters, digits
 from textwrap import dedent as tw_dedent
-from datetime import date, datetime
-
-from pandas.tslib import Timestamp
+from itertools import izip_longest
 
 from simplejson import load, dumps
 from simplejson.scanner import JSONDecodeError
@@ -42,15 +39,6 @@ def get_or_call(cache_name, url, func, cache_only=False):
         cache_file.write(dumps(result, sort_keys=True, indent=4 * ' '))
 
     return result
-
-
-def file_cache(cache_name):
-    def cache_decorator(func):
-        @wraps(func)
-        def func_wrapper(url):
-            return get_or_call(cache_name, url, func)
-        return func_wrapper
-    return cache_decorator
 
 
 def flatten(items, current_path=None):
@@ -111,12 +99,7 @@ def dedent(text):
     return tw_dedent(text).strip()
 
 
-def encode_conplex(obj):
-
-    if isinstance(obj, Timestamp):
-        return obj.to_datetime().isoformat()
-
-    if isinstance(obj, (datetime, date)):
-        return obj.isoformat()
-
-    raise TypeError(repr(obj) + " is not JSON serializable")
+def grouper(n, iterable, fillvalue=None):
+    "grouper(3, 'ABCDEFG', 'x') --> ABC DEF Gxx"
+    args = [iter(iterable)] * n
+    return izip_longest(fillvalue=fillvalue, *args)

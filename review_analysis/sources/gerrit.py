@@ -105,6 +105,17 @@ class Gerrit(object):
                 else:
                     url = None
 
+    def reviews_es_bulk_format(self):
+
+        for review in self.reviews():
+
+            yield {
+                '_index': 'review',
+                '_type': 'review-openstack-org',
+                '_id': review['id'],
+                '_source': review
+            }
+
     def as_dataframe(self, limit=None, keys=None):
 
         if keys is not None:

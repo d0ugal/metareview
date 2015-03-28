@@ -1,11 +1,12 @@
+from itertools import islice
 from os import environ
 
-import os
 import click
-from simplejson import dumps
+from elasticsearch import Elasticsearch
+from elasticsearch.helpers import bulk
 
 from review_analysis.sources.gerrit import Gerrit
-from review_analysis.util import dedent, encode_conplex
+from review_analysis.util import dedent, grouper
 
 
 @click.group()
@@ -53,10 +54,9 @@ def warm_cache(url, username, password, verbose, limit):
 
 @cli.command()
 @common_options
-@click.argument('output', type=click.Path(file_okay=False, exists=True))
 @click.argument('ip', type=str)
 @click.option('--limit', type=int)
-def es_bulk_load(url, username, password, verbose, limit, output, ip):
+def es_bulk_load(url, username, password, verbose, limit, ip, reset=True):
     """
     Download all of the datas.
     """
@@ -67,49 +67,32 @@ def es_bulk_load(url, username, password, verbose, limit, output, ip):
         username=username,
         verbose=verbose)
 
-    reviews = gerrit.reviews()
+    reviews_gen = islice(gerrit.reviews_es_bulk_format(), limit)
 
-    outf = None
+    es = Elasticsearch(ip)
 
-    print """#!/bin/bash
+    if reset and es.indices.exists('review'):
+        print "Resetting."
+        es.indices.delete('review')
+        es.indices.create('review')
+        print "Reset dome."
 
-set -e;
-set -x;
-"""
+    bulk_size = 500
 
-    print "curl -XDELETE 'http://{0}:9200/_all';".format(ip)
-    print "curl -XDELETE 'http://{0}:9200/_all';".format(ip)
-    print "curl -XDELETE 'http://{0}:9200/review/_mapping';".format(ip)
+    print "Starting load"
 
-    batch_size = 1000
+    for i, review_group in enumerate(grouper(bulk_size, reviews_gen), start=1):
+        count, errors = bulk(es, review_group)
 
-    for i, review in enumerate(reviews):
+        if count != bulk_size or len(errors):
+            print count, errors
+            raise Exception("uh oh")
 
-        if outf is None or i % batch_size == 0:
-            if outf is not None:
-                outf.close()
-            path = os.path.join(output, 'file-{}.json'.format(i/batch_size))
-            outf = open(path, 'wa')
-            print "curl -s -XPOST {0}:9200/_bulk --data-binary @{1};".format(
-                ip, outf.name)
+        print "Loaded {}".format(i * bulk_size)
 
-        if i == limit:
-            break
-
-        outf.write(dumps({
-            "index": {
-                "_index": "review",
-                "_type": "review-openstack-org",
-                "_id": review['id'],
-            }
-        }))
-        outf.write("\n")
-        outf.write(dumps(review, default=encode_conplex))
-        outf.write("\n")
-
-    print "curl -XPOST 'http://{0}:9200/review/_optimize';".format(ip)
-    print ("echo 'Output %s reviews in Elasticsearch bulk "
-           "format';" % (i + 1))
+    print "Load finished, optimizing"
+    es.indices.optimize('review')
+    print "Optimize finished"
 
 
 @cli.command()

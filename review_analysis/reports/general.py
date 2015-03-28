@@ -1,21 +1,20 @@
-from .base import Result, ReportCollection
+from pandas import DataFrame
+
+from .base import ReportCollection
 
 
-def number_of_reviews(df):
-    """
-    Given a data frame, group by the number of reviewers that
-    have reviewed this patch and return the grouped count.
-    """
-    by_reviews = df.groupby('labels.Code-Review.totals.all')
+def number_of_reviews(review_manager):
 
-    return Result(
-        by_reviews['created'].count(),
-        kind='bar'
-    )
+    result = review_manager.aggr_count("labels.Code-Review.totals.all")
+    df = DataFrame(result).set_index('key').sort_index()
+    df.columns = ["Review Count", ]
 
-ReportCollection('general', [
-    'created',
-    'labels.Code-Review.totals.all',
-]).add_many((
-    ('number_of_reviews', number_of_reviews),
+    plot = df.plot(kind="bar", figsize=(12, 8))
+
+    plot.set_xlabel("Number of times reviewed")
+    plot.set_ylabel("Number of reviews")
+
+
+ReportCollection('general').add_many((
+    ('Number of reviews per patch', number_of_reviews),
 ))

@@ -32,8 +32,7 @@ def get_or_call(cache_name, url, func, cache_only=False):
 
     result = func(url)
 
-    if not path.exists(cache_dir):
-        makedirs(cache_dir)
+    ensure_directory(cache_dir)
 
     with open(cache_path, 'w+') as cache_file:
         cache_file.write(dumps(result, sort_keys=True, indent=4 * ' '))
@@ -103,3 +102,8 @@ def grouper(n, iterable, fillvalue=None):
     "grouper(3, 'ABCDEFG', 'x') --> ABC DEF Gxx"
     args = [iter(iterable)] * n
     return izip_longest(fillvalue=fillvalue, *args)
+
+
+def ensure_directory(directory):
+    if not path.exists(directory):
+        makedirs(directory)

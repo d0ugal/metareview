@@ -2,11 +2,15 @@ from itertools import islice
 from os import environ
 
 import click
+import time
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
+import matplotlib.pyplot as plt
 
+from review_analysis.models import ReviewManager
 from review_analysis.sources.gerrit import Gerrit
-from review_analysis.util import dedent, grouper
+from review_analysis.reports import get_collections
+from review_analysis.util import grouper, ensure_directory
 
 
 @click.group()
@@ -44,6 +48,7 @@ def warm_cache(url, username, password, verbose, limit):
         url=url,
         username=username,
         verbose=verbose)
+
     for i, _ in enumerate(gerrit.reviews(), start=1):
         if i == limit:
             break
@@ -56,7 +61,9 @@ def warm_cache(url, username, password, verbose, limit):
 @common_options
 @click.argument('ip', type=str)
 @click.option('--limit', type=int)
-def es_bulk_load(url, username, password, verbose, limit, ip, reset=True):
+@click.option('--skip', type=int)
+@click.option('--reset', is_flag=True)
+def es_load(url, username, password, verbose, limit, ip, skip=0, reset=False):
     """
     Download all of the datas.
     """
@@ -75,20 +82,32 @@ def es_bulk_load(url, username, password, verbose, limit, ip, reset=True):
         print "Resetting."
         es.indices.delete('review')
         es.indices.create('review')
-        print "Reset dome."
+        print "Reset done."
 
     bulk_size = 500
 
     print "Starting load"
 
     for i, review_group in enumerate(grouper(bulk_size, reviews_gen), start=1):
-        count, errors = bulk(es, review_group)
+
+        progress = i * bulk_size
+
+        if progress <= skip:
+            print "Skipped {}".format(progress)
+            continue
+
+        for i in range(5):
+            try:
+                count, errors = bulk(es, review_group)
+                break
+            except Exception as e:
+                print "Retrying due to {0} ({1}/5)".format(e, i)
 
         if count != bulk_size or len(errors):
             print count, errors
             raise Exception("uh oh")
 
-        print "Loaded {}".format(i * bulk_size)
+        print "Loaded {}".format(progress)
 
     print "Load finished, optimizing"
     es.indices.optimize('review')
@@ -96,46 +115,34 @@ def es_bulk_load(url, username, password, verbose, limit, ip, reset=True):
 
 
 @cli.command()
-@common_options
+@click.argument('ip', type=str)
 @click.option('--limit', type=int)
-@click.option('--collection', type=str, default=None)
-@click.option('--cache-only', is_flag=True, default=False)
-def report(url, username, password, verbose, limit, collection, cache_only):
+@click.option('--collection', type=str)
+@click.option('--debug', is_flag=True)
+def report(limit, ip, collection, debug=False):
 
-    if cache_only:
-        print 'Only using JSON already in the cache.'
+    es = Elasticsearch(ip)
+    reviews = ReviewManager(es)
 
-    gerrit = Gerrit(
-        cache_only=cache_only,
-        password=password,
-        url=url,
-        username=username,
-        verbose=verbose)
-
-    from review_analysis.reports import get_collections
     for c in get_collections():
 
-        if collection is not None and c.name != collection:
+        if collection is not None and c.slug != collection:
             continue
 
-        df = gerrit.as_dataframe(limit, keys=c.required_keys)
-
-        markdown = open('docs/reports/{0}.md'.format(c.slug), 'w')
-        markdown.write('# {0}\n\n'.format(c.name))
+        print "\nCOLLECTION: {0}".format(c.slug)
 
         for name, report in c.reports.items():
-            markdown.write('## {0}\n\n{1}\n\n'.format(
-                name, dedent(getattr(report, '__doc__', ''))))
-            try:
-                print 'START: {0}:{1}'.format(c.name, report.slug), ' ... ',
-                result = report(df)
-                f = result.plot().get_figure()
-                path = 'docs/images/{0}.{1}.png'.format(c.name, report.slug)
-                f.savefig(path)
-                markdown.write('![{0}]({1})\n\n'.format(path, path[4:]))
-                print 'DONE'
-            except Exception:
-                print 'FAIL'
-                raise
 
-        markdown.close()
+            print "\tREPORT: {0}".format(report.slug)
+            start = time.time()
+            try:
+                plt.figure()
+                report(reviews)
+                ensure_directory("images/{0}/".format(c.slug))
+                path = "docs/images/{0}/{0}.png".format(c.slug, report.slug)
+                plt.savefig(path, format="png")
+                print "\t\tDONE ({0}s)".format(time.time() - start)
+            except Exception as e:
+                if debug:
+                    raise
+                print "\t\tFAIL ({0:.2f}s)".format(time.time() - start), str(e)

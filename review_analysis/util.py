@@ -3,6 +3,9 @@ from os import path, makedirs
 from hashlib import sha1
 from string import letters, digits
 from textwrap import dedent as tw_dedent
+from datetime import date, datetime
+
+from pandas.tslib import Timestamp
 
 from simplejson import load, dumps
 from simplejson.scanner import JSONDecodeError
@@ -106,3 +109,14 @@ def dedent(text):
     if text is None:
         return
     return tw_dedent(text).strip()
+
+
+def encode_conplex(obj):
+
+    if isinstance(obj, Timestamp):
+        return obj.to_datetime().isoformat()
+
+    if isinstance(obj, (datetime, date)):
+        return obj.isoformat()
+
+    raise TypeError(repr(obj) + " is not JSON serializable")

@@ -8,3 +8,5 @@ dist
 tags
 _cache/*
 site/
+run.sh
+output

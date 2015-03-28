@@ -21,7 +21,7 @@ CHANGES_URL = ("/changes/?q=status:%s"
                "&o=DETAILED_LABELS"
                "&o=DOWNLOAD_COMMANDS"
                "&o=MESSAGES"
-               "&n=100")
+               "&n=50")
 
 MERGERS = (
     1,  # corvus
@@ -239,10 +239,6 @@ def latest_revision(review):
 
     revisions = review.pop('revisions')
 
-    review['revisions'] = {
-        "all": revisions.items()
-    }
-
     rev_sort = lambda rev: rev[1]['_number']
     sha, latest = sorted(revisions.items(), key=rev_sort)[-1]
 
@@ -251,8 +247,6 @@ def latest_revision(review):
 
     totals['lines_inserted'] = sum(_lines(latest, 'lines_inserted'))
     totals['lines_deleted'] = sum(_lines(latest, 'lines_deleted'))
-    latest.pop('files')
-    review['revisions']['latest'] = latest
 
     totals['lines_total'] = (
         totals['lines_inserted'] + totals['lines_deleted'])
@@ -265,7 +259,22 @@ def latest_revision(review):
 
     review['owner']['tz'] = latest['commit']['author']['tz']
 
-    review['revisions']['totals'] = totals
+    revisions_list = []
+
+    for sha, revision in revisions.items():
+        revision['sha'] = sha
+        files = []
+        for filename, file_stats in revision.pop('files', {}).items():
+            file_stats['name'] = filename
+            files.append(file_stats)
+        revision['files'] = files
+        revisions_list.append(revision)
+
+    review['revisions'] = {
+        "all": revisions_list,
+        "latest": latest,
+        "totals": totals
+    }
 
 
 def merged_details(review):

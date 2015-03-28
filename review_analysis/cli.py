@@ -1,10 +1,11 @@
 from os import environ
 
+import os
 import click
+from simplejson import dumps
 
-from review_analysis.reports import get_collections
 from review_analysis.sources.gerrit import Gerrit
-from review_analysis.util import dedent
+from review_analysis.util import dedent, encode_conplex
 
 
 @click.group()
@@ -32,7 +33,8 @@ def common_options(f):
 
 @cli.command()
 @common_options
-def warm_cache(url, username, password, verbose):
+@click.option('--limit', type=int)
+def warm_cache(url, username, password, verbose, limit):
     """
     Download all of the datas.
     """
@@ -41,7 +43,9 @@ def warm_cache(url, username, password, verbose):
         url=url,
         username=username,
         verbose=verbose)
-    for i, _ in enumerate(gerrit.reviews()):
+    for i, _ in enumerate(gerrit.reviews(), start=1):
+        if i == limit:
+            break
         continue
 
     print "Warmed the cache for %s reviews" % i
@@ -49,9 +53,74 @@ def warm_cache(url, username, password, verbose):
 
 @cli.command()
 @common_options
+@click.argument('output', type=click.Path(file_okay=False, exists=True))
+@click.argument('ip', type=str)
+@click.option('--limit', type=int)
+def es_bulk_load(url, username, password, verbose, limit, output, ip):
+    """
+    Download all of the datas.
+    """
+    gerrit = Gerrit(
+        cache_only=True,
+        password=password,
+        url=url,
+        username=username,
+        verbose=verbose)
+
+    reviews = gerrit.reviews()
+
+    outf = None
+
+    print """#!/bin/bash
+
+set -e;
+set -x;
+"""
+
+    print "curl -XDELETE 'http://{0}:9200/_all';".format(ip)
+    print "curl -XDELETE 'http://{0}:9200/_all';".format(ip)
+    print "curl -XDELETE 'http://{0}:9200/review/_mapping';".format(ip)
+
+    batch_size = 500
+
+    for i, review in enumerate(reviews):
+
+        if outf is None or i % batch_size == 0:
+            if outf is not None:
+                outf.close()
+            path = os.path.join(output, 'file-{}.json'.format(i/batch_size))
+            outf = open(path, 'wa')
+            print "curl -s -XPOST {0}:9200/_bulk --data-binary @{1};".format(
+                ip, outf.name)
+
+        if i % 2000 == 0:
+            print "sleep 10;"
+            print "curl -XPOST 'http://{0}:9200/review/_optimize';".format(ip)
+
+        if i == limit:
+            break
+
+        outf.write(dumps({
+            "index": {
+                "_index": "review",
+                "_type": "review-openstack-org",
+                "_id": review['id'],
+            }
+        }))
+        outf.write("\n")
+        outf.write(dumps(review, default=encode_conplex))
+        outf.write("\n")
+
+    print "curl -XPOST 'http://{0}:9200/review/_optimize';".format(ip)
+    print ("echo 'Output %s reviews in Elasticsearch bulk "
+           "format';" % (i + 1))
+
+
+@cli.command()
+@common_options
 @click.option('--limit', type=int)
 @click.option('--collection', type=str, default=None)
-@click.option('--cache-only', is_flag=True, default=True)
+@click.option('--cache-only', is_flag=True, default=False)
 def report(url, username, password, verbose, limit, collection, cache_only):
 
     if cache_only:
@@ -64,6 +133,7 @@ def report(url, username, password, verbose, limit, collection, cache_only):
         username=username,
         verbose=verbose)
 
+    from review_analysis.reports import get_collections
     for c in get_collections():
 
         if collection is not None and c.name != collection:

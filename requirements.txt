@@ -7,3 +7,5 @@ pygerrit
 retrying
 simplejson
 awesome-slugify
+matplotlib
+seaborn

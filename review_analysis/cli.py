@@ -1,16 +1,9 @@
-from itertools import islice
 from os import environ
 
 import click
-import time
-from elasticsearch import Elasticsearch
-from elasticsearch.helpers import bulk
-import matplotlib.pyplot as plt
 
-from review_analysis.models import ReviewManager
 from review_analysis.sources.gerrit import Gerrit
-from review_analysis.reports import get_collections
-from review_analysis.util import grouper, ensure_directory
+from review_analysis.stores import db
 
 
 @click.group()
@@ -49,7 +42,7 @@ def warm_cache(url, username, password, verbose, limit):
         username=username,
         verbose=verbose)
 
-    for i, _ in enumerate(gerrit.reviews(), start=1):
+    for i, _ in enumerate(gerrit.reviews()):
         if i == limit:
             break
         continue
@@ -58,91 +51,45 @@ def warm_cache(url, username, password, verbose, limit):
 
 
 @cli.command()
+def initdb():
+    db.initdb()
+
+
+@cli.command()
 @common_options
-@click.argument('ip', type=str)
 @click.option('--limit', type=int)
-@click.option('--skip', type=int)
-@click.option('--reset', is_flag=True)
-def es_load(url, username, password, verbose, limit, ip, skip=0, reset=False):
-    """
-    Download all of the datas.
-    """
+def loaddb(url, username, password, verbose, limit):
     gerrit = Gerrit(
-        cache_only=True,
         password=password,
         url=url,
         username=username,
         verbose=verbose)
 
-    reviews_gen = islice(gerrit.reviews_es_bulk_format(), limit)
+    session = db.Session()
 
-    es = Elasticsearch(ip)
+    ids = set()
 
-    if reset and es.indices.exists('review'):
-        print "Resetting."
-        es.indices.delete('review')
-        es.indices.create('review')
-        print "Reset done."
+    for i, change in enumerate(gerrit.reviews()):
+        if i == limit:
+            break
 
-    bulk_size = 500
+        if i % 1000 == 0:
+            print "Loaded {} reviews. {}".format(i, len(ids))
 
-    print "Starting load"
+        change_id = change['_number']
+        ids.add(change_id)
 
-    for i, review_group in enumerate(grouper(bulk_size, reviews_gen), start=1):
+        try:
+            q = session.query(db.Change).filter(db.Change.id == change_id)
 
-        progress = i * bulk_size
+            if not bool(q.count()):
+                session.add(db.Change(id=change['_number'], data=change))
+                session.commit()
+            else:
+                print change_id
 
-        if progress <= skip:
-            print "Skipped {}".format(progress)
-            continue
+        except:
+            print change_id
+            raise
 
-        for i in range(5):
-            try:
-                count, errors = bulk(es, review_group)
-                break
-            except Exception as e:
-                print "Retrying due to {0} ({1}/5)".format(e, i)
-
-        if count != bulk_size or len(errors):
-            print count, errors
-            raise Exception("uh oh")
-
-        print "Loaded {}".format(progress)
-
-    print "Load finished, optimizing"
-    es.indices.optimize('review')
-    print "Optimize finished"
-
-
-@cli.command()
-@click.argument('ip', type=str)
-@click.option('--limit', type=int)
-@click.option('--collection', type=str)
-@click.option('--debug', is_flag=True)
-def report(limit, ip, collection, debug=False):
-
-    es = Elasticsearch(ip)
-    reviews = ReviewManager(es)
-
-    for c in get_collections():
-
-        if collection is not None and c.slug != collection:
-            continue
-
-        print "\nCOLLECTION: {0}".format(c.slug)
-
-        for name, report in c.reports.items():
-
-            print "\tREPORT: {0}".format(report.slug)
-            start = time.time()
-            try:
-                plt.figure()
-                report(reviews)
-                ensure_directory("images/{0}/".format(c.slug))
-                path = "docs/images/{0}/{0}.png".format(c.slug, report.slug)
-                plt.savefig(path, format="png")
-                print "\t\tDONE ({0}s)".format(time.time() - start)
-            except Exception as e:
-                if debug:
-                    raise
-                print "\t\tFAIL ({0:.2f}s)".format(time.time() - start), str(e)
+    print "Warmed the cache for %s reviews" % i

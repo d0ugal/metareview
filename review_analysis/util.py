@@ -1,8 +1,6 @@
 from os import path, makedirs
 from hashlib import sha1
 from string import letters, digits
-from textwrap import dedent as tw_dedent
-from itertools import izip_longest
 
 from simplejson import load, dumps
 from simplejson.scanner import JSONDecodeError
@@ -40,68 +38,12 @@ def get_or_call(cache_name, url, func, cache_only=False):
     return result
 
 
-def flatten(items, current_path=None):
-    """
-    Given a nested data structure, create a flattened representation of it that
-    can then more easily be converted into something like a CSV.
-
-    {
-        'key': 'value',
-        'key2': {
-            'valuea': 1,
-            'valueb': 2,
-        }
-    }
-
-    --->
-
-    {
-        'key': 'value',
-        'key2.valuea': 1,
-        'key2.valueb': 2,
-    }
-
-    """
-
-    if isinstance(items, dict):
-        items = items.iteritems()
-
-    for key, value in items:
-
-        if current_path is not None:
-            new_path = "{0}.{1}".format(current_path, key)
-        else:
-            new_path = key
-
-        if not isinstance(key, basestring):
-            raise ValueError("Expect all dictionary keys to be strings.")
-
-        if not isinstance(value, dict):
-            yield new_path, value
-            continue
-
-        for sub_key, sub_value in flatten(value, new_path):
-            yield sub_key, sub_value
-
-
 def unique_alphanum(string):
     digest = str(sha1(string).hexdigest())[:8]
     alphanum = letters + digits
     string = string.lower()
     cleaned = ''.join(l if l in alphanum else '-' for l in string)
     return "%s-%s" % (digest, cleaned)
-
-
-def dedent(text):
-    if text is None:
-        return
-    return tw_dedent(text).strip()
-
-
-def grouper(n, iterable, fillvalue=None):
-    "grouper(3, 'ABCDEFG', 'x') --> ABC DEF Gxx"
-    args = [iter(iterable)] * n
-    return izip_longest(fillvalue=fillvalue, *args)
 
 
 def ensure_directory(directory):

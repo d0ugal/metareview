@@ -1,11 +1,12 @@
 from itertools import count
 import datetime
+import time
 
 from httplib import IncompleteRead
 from pygerrit.rest import GerritRestAPI
 from requests.auth import HTTPDigestAuth
 from requests.exceptions import SSLError
-from retrying import retry
+from retrace import retry
 import requests
 
 from review_analysis.util import (get_or_call, CacheMiss, unique_alphanum)
@@ -45,11 +46,12 @@ class Gerrit(object):
         self.gerrit = GerritRestAPI(url=self.url, auth=auth)
 
     @retry(
-        stop_max_attempt_number=5,
-        retry_on_exception=lambda e: isinstance(e, (
+        on_exception=(
             SSLError, IncompleteRead, requests.exceptions.ConnectionError,
-            requests.exceptions.HTTPError)),
-        wait_exponential_multiplier=1000, wait_exponential_max=10000
+            requests.exceptions.HTTPError
+        ),
+        limit=10,
+        interval=time.sleep
     )
     def _get(self, url):
         try:

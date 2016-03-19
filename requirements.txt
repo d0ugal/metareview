@@ -1,11 +1,7 @@
 click
-elasticsearch-dsl
-elasticsearch>=1.0.0,<2.0.0
 mkdocs
-pandas
+psycopg2
 pygerrit
-retrying
+retrace
 simplejson
-awesome-slugify
-matplotlib
-seaborn
+sqlalchemy

@@ -1,5 +1,5 @@
-from os import path, makedirs
 from hashlib import sha1
+from os import path, makedirs
 from string import letters, digits
 
 from simplejson import load, dumps

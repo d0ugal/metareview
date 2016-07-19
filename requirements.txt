@@ -1,7 +1,4 @@
 click
-mkdocs
-psycopg2
 pygerrit
 retrace
 simplejson
-sqlalchemy

@@ -13,7 +13,7 @@ from review_analysis.util import (get_or_call, CacheMiss, unique_alphanum)
 
 STATUSES = ['merged', 'new', 'submitted', 'abandoned', 'draft']
 
-BATCH_SIZE = 500
+BATCH_SIZE = 50
 
 CHANGES_URL = ("/changes/?q=status:%s"
                "&o=ALL_COMMITS"
@@ -79,14 +79,3 @@ class Gerrit(object):
 
                 if review.get('_more_changes') is None:
                     break
-
-    def reviews_es_bulk_format(self):
-
-        for review in self.reviews():
-
-            yield {
-                '_index': 'review',
-                '_type': 'review-openstack-org',
-                '_id': review['id'],
-                '_source': review
-            }

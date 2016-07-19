@@ -18,8 +18,7 @@ Questions/Ideas
 - What impact on the reviewers does a patch with multiple revisions have?
 - Which projects use recheck the most?
 - Year on year
-
-118670
+- Wordcloud of review comments
 
 
 High level averages, then by year.

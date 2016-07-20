@@ -1,6 +1,5 @@
 from hashlib import sha1
 from os import path, makedirs
-from string import letters, digits
 
 from simplejson import load, dumps
 from simplejson.scanner import JSONDecodeError
@@ -39,11 +38,7 @@ def get_or_call(cache_name, url, func, cache_only=False):
 
 
 def unique_alphanum(string):
-    digest = str(sha1(string).hexdigest())[:8]
-    alphanum = letters + digits
-    string = string.lower()
-    cleaned = ''.join(l if l in alphanum else '-' for l in string)
-    return "%s-%s" % (digest, cleaned)
+    return str(sha1(string).hexdigest())[:8]
 
 
 def ensure_directory(directory):

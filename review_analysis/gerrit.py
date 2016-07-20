@@ -54,28 +54,35 @@ class Gerrit(object):
         interval=time.sleep
     )
     def _get(self, url):
+
+        start = datetime.datetime.now()
+
         try:
             if self.verbose:
-                print datetime.datetime.now(), url,
+                print start, url,
             return get_or_call('gerrit-get/{0}'.format(self._url_key),
                                url, self.gerrit.get, self.cache_only)
         except CacheMiss:
             return []
         finally:
             if self.verbose:
-                print datetime.datetime.now()
+                print (datetime.datetime.now() - start).seconds
+
+    def _url_generator(self):
+
+        for status in STATUSES:
+            for i in count():
+                url = CHANGES_URL % (status, BATCH_SIZE, i * BATCH_SIZE)
+                yield url
 
     def reviews(self):
 
-        for status in STATUSES:
+        for url in self._url_generator():
 
-            for i in count():
+            review = {}
 
-                url = CHANGES_URL % (status, BATCH_SIZE, i * BATCH_SIZE)
-                review = {}
+            for review in self._get(url):
+                yield review
 
-                for review in self._get(url):
-                    yield review
-
-                if review.get('_more_changes') is None:
-                    break
+            if review.get('_more_changes') is None:
+                break

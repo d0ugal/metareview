@@ -12,11 +12,12 @@ class CacheMiss(Exception):
     pass
 
 
-def get_or_call(cache_name, url, func, cache_only=False):
+def get_or_call(url, func, cache_only=False):
 
     key = unique_alphanum(url)
-    cache_dir = path.join(_PATH, cache_name)
-    cache_path = path.join(_PATH, cache_name, key)
+    part_key = key[:2]
+    cache_dir = path.join(_PATH, "/".join(part_key))
+    cache_path = path.join(_PATH, "/".join(part_key), key)
 
     if path.exists(cache_path):
         with open(cache_path) as cached_file:

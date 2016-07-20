@@ -35,15 +35,37 @@ def warm_cache(url, username, password, verbose, limit):
     """
     Download all of the datas.
     """
-    gerrit = Gerrit(
-        password=password,
-        url=url,
-        username=username,
-        verbose=verbose)
+    gerrit = Gerrit(password=password, url=url, username=username,
+                    verbose=verbose)
 
-    for i, _ in enumerate(gerrit.reviews()):
+    for i, _ in enumerate(gerrit.reviews(), start=1):
         if i == limit:
             break
         continue
 
     print "Warmed the cache for %s reviews" % i
+
+
+@cli.command()
+@common_options
+@click.option('--limit', type=int)
+@click.option('--author', type=str)
+@click.argument('output', type=click.File('wb'))
+def extract_comments(url, username, password, verbose, output, author, limit):
+
+    gerrit = Gerrit(password=password, url=url, username=username,
+                    verbose=verbose, cache_only=True)
+
+    for i, review in enumerate(gerrit.reviews(), start=1):
+        if i == limit:
+            break
+
+        for comment in review['messages']:
+
+            if author and comment.get('author', {}).get('username') != author:
+                continue
+
+            output.write(comment['message'].encode('utf-8'))
+            output.write("\n")
+
+    print "Extracted comments for {} reviews".format(i)

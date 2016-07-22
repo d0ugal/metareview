@@ -1,8 +1,8 @@
 from itertools import count
+from functools import partial
 import time
 
 from httplib import IncompleteRead
-from pygerrit.rest import GerritRestAPI
 from requests.auth import HTTPDigestAuth
 from requests.exceptions import SSLError
 from retrace import retry
@@ -10,7 +10,9 @@ import requests
 
 from review_analysis.util import (get_or_call, CacheMiss, unique_alphanum)
 
-CHANGES_URL = ("/changes/?q={}"
+
+CHANGES_URL = ("https://review.openstack.org"
+               "/changes/?q={}"
                "&o=ALL_COMMITS"
                "&o=ALL_FILES"
                "&o=ALL_REVISIONS"
@@ -23,20 +25,22 @@ CHANGES_URL = ("/changes/?q={}"
 class Gerrit(object):
 
     def __init__(self, username, password, url, cache_only=False,
-                 verbose=False):
+                 verbose=False, start=1, end=None):
 
         self.username = username
         self.password = password
         self.url = url
 
         self._url_key = unique_alphanum(self.url)
+        self.start = start
+        self.end = end
 
         self.verbose = verbose
 
         self.cache_only = cache_only
 
         auth = HTTPDigestAuth(self.username, self.password)
-        self.gerrit = GerritRestAPI(url=self.url, auth=auth)
+        self.gerrit = partial(requests.get, auth=auth)
 
     @retry(
         on_exception=(
@@ -51,13 +55,14 @@ class Gerrit(object):
         try:
             if self.verbose:
                 print url
-            return get_or_call(url, self.gerrit.get, self.cache_only)
+            return get_or_call(url, self.gerrit, self.cache_only)
         except CacheMiss:
-            return None
+            return []
 
     def _url_generator(self):
-
-        for i in count(start=1):
+        for i in count(start=self.start):
+            if self.end is not None and i > self.end:
+                break
             yield CHANGES_URL.format(i)
 
     def reviews(self):

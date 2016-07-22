@@ -1,4 +1,2 @@
 click
-pygerrit
 retrace
-simplejson

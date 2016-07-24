@@ -93,9 +93,67 @@ def extract_comments(url, username, password, verbose, output, owner, author,
             c = c.replace("Workflow-1", "")
             c = c.replace("was rebased", "")
             c = c.replace("Commit message was updated", "")
-            c = c.replace("Automatically re-added by Gerrit trivial rebase detection script", "")
+            c = c.replace("Automatically re-added by Gerrit trivial rebase "
+                          "detection script", "")
 
             output.write(c)
             output.write("\n")
 
     print "Extracted comments for {} reviews".format(i)
+
+
+@cli.command()
+@common_options
+@click.option('--limit', type=int)
+@click.option('--author', type=str)
+@click.option('--owner', type=str)
+@click.argument('output', type=click.File('wb'))
+def extract_subject(url, username, password, verbose, output, owner, author,
+                    limit):
+
+    gerrit = Gerrit(password=password, url=url, username=username,
+                    verbose=verbose, cache_only=True)
+
+    for i, review in enumerate(gerrit.reviews(), start=1):
+        if i == limit:
+            break
+
+        try:
+            sha = review['current_revision']
+        except:
+            print review['_number']
+            continue
+        s = review['revisions'][sha]['commit']['subject'].encode('utf-8')
+        output.write(s)
+        output.write("\n")
+
+    print "Extracted subjects for {} reviews".format(i)
+
+
+@cli.command()
+@common_options
+@click.option('--limit', type=int)
+@click.option('--author', type=str)
+@click.option('--owner', type=str)
+@click.argument('output', type=click.File('wb'))
+def extract_commit_msg(url, username, password, verbose, output, owner, author,
+                       limit):
+
+    gerrit = Gerrit(password=password, url=url, username=username,
+                    verbose=verbose, cache_only=True)
+
+    for i, review in enumerate(gerrit.reviews(), start=1):
+        if i == limit:
+            break
+
+        try:
+            sha = review['current_revision']
+        except:
+            print review['_number']
+            continue
+        s = review['revisions'][sha]['commit']['message'].encode('utf-8')
+
+        output.write(s)
+        output.write("\n")
+
+    print "Extracted subjects for {} reviews".format(i)

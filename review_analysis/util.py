@@ -15,7 +15,7 @@ GERRIT_MAGIC_JSON_PREFIX = ")]}\'\n"
 
 def get_or_call(url, func, cache_only=False):
 
-    key = unique_alphanum(url.replace("https://review.openstack.org", ""))
+    key = unique_alphanum(url)
     part_key = key[:2]
     cache_dir = path.join(_PATH, "/".join(part_key))
     cache_path = path.join(_PATH, "/".join(part_key), key)

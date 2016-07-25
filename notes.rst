@@ -19,6 +19,7 @@ Questions/Ideas
 - Which projects use recheck the most?
 - Year on year
 - Wordcloud of review comments
+- Bull in bug data from launchpad - find a correlation there?
 
 
 High level averages, then by year.

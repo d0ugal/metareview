@@ -1,8 +1,8 @@
-from os import environ
+from __future__ import print_function
 
 import click
 
-from review_analysis.gerrit import Gerrit
+from metareview.gerrit import Gerrit
 
 
 @click.group()
@@ -10,65 +10,44 @@ def cli():
     pass
 
 
-def common_options(f):
-    """Applies a set of common click argument decorators to the
-    function `f`.
-
-    The arguments are --url, --username, --password, and --verbose.
-    """
-    return reduce(
-        lambda f, d: d(f),
-        (click.option('--url', type=str,
-                      default='https://review.openstack.org'),
-         click.option('--username', type=str,
-                      default=environ.get('GERRIT_USERNAME')),
-         click.option('--password', type=str,
-                      default=environ.get('GERRIT_PASSWORD')),
-         click.option('--verbose', is_flag=True, default=False)),
-        f)
-
-
 @cli.command()
-@common_options
+@click.option('--verbose', is_flag=True, default=False)
 @click.option('--limit', type=int)
 @click.option('--start', type=int, default=1)
 @click.option('--end', type=int)
-def warm_cache(url, username, password, verbose, end, start, limit):
+def warm_cache(verbose, end, start, limit):
     """
     Download all of the datas.
     """
-    gerrit = Gerrit(password=password, url=url, username=username,
-                    verbose=verbose, start=start, end=end)
+    gerrit = Gerrit(verbose=verbose, start=start, end=end)
 
     for i, _ in enumerate(gerrit.reviews(), start=1):
         if i == limit:
             break
         continue
     else:
-        print "No reviews? start={}, end={}, limit={}".format(start, end, limit)
+        print("No reviews? start={},end={},limit={}".format(start, end, limit))
         return
 
-    print "Warmed the cache for %s reviews" % i
+    print ("Warmed the cache for %s reviews" % i)
 
 
 @cli.command()
-@common_options
+@click.option('--verbose', is_flag=True, default=False)
 @click.option('--limit', type=int)
 @click.option('--author', type=str)
 @click.option('--owner', type=str)
 @click.argument('output', type=click.File('wb'))
-def extract_comments(url, username, password, verbose, output, owner, author,
-                     limit):
+def extract_comments(verbose, output, owner, author, limit):
 
-    gerrit = Gerrit(password=password, url=url, username=username,
-                    verbose=verbose, cache_only=True)
+    gerrit = Gerrit(verbose=verbose, cache_only=True)
 
     for i, review in enumerate(gerrit.reviews(), start=1):
         if i == limit:
             break
 
         if i % 1000 == 0:
-            print i
+            print(i)
 
         if owner and review.get('owner', {}).get('username') != owner:
             continue
@@ -99,20 +78,18 @@ def extract_comments(url, username, password, verbose, output, owner, author,
             output.write(c)
             output.write("\n")
 
-    print "Extracted comments for {} reviews".format(i)
+    print("Extracted comments for {} reviews".format(i))
 
 
 @cli.command()
-@common_options
+@click.option('--verbose', is_flag=True, default=False)
 @click.option('--limit', type=int)
 @click.option('--author', type=str)
 @click.option('--owner', type=str)
 @click.argument('output', type=click.File('wb'))
-def extract_subject(url, username, password, verbose, output, owner, author,
-                    limit):
+def extract_subject(verbose, output, owner, author, limit):
 
-    gerrit = Gerrit(password=password, url=url, username=username,
-                    verbose=verbose, cache_only=True)
+    gerrit = Gerrit(verbose=verbose, cache_only=True)
 
     for i, review in enumerate(gerrit.reviews(), start=1):
         if i == limit:
@@ -121,26 +98,25 @@ def extract_subject(url, username, password, verbose, output, owner, author,
         try:
             sha = review['current_revision']
         except:
-            print review['_number']
+            print(review['_number'])
             continue
         s = review['revisions'][sha]['commit']['subject'].encode('utf-8')
         output.write(s)
         output.write("\n")
 
-    print "Extracted subjects for {} reviews".format(i)
+    print("Extracted subjects for {} reviews".format(i))
 
 
 @cli.command()
-@common_options
+@click.option('--verbose', is_flag=True, default=False)
 @click.option('--limit', type=int)
 @click.option('--author', type=str)
 @click.option('--owner', type=str)
 @click.argument('output', type=click.File('wb'))
-def extract_commit_msg(url, username, password, verbose, output, owner, author,
+def extract_commit_msg(verbose, output, owner, author,
                        limit):
 
-    gerrit = Gerrit(password=password, url=url, username=username,
-                    verbose=verbose, cache_only=True)
+    gerrit = Gerrit(verbose=verbose, cache_only=True)
 
     for i, review in enumerate(gerrit.reviews(), start=1):
         if i == limit:
@@ -149,11 +125,11 @@ def extract_commit_msg(url, username, password, verbose, output, owner, author,
         try:
             sha = review['current_revision']
         except:
-            print review['_number']
+            print(review['_number'])
             continue
         s = review['revisions'][sha]['commit']['message'].encode('utf-8')
 
         output.write(s)
         output.write("\n")
 
-    print "Extracted subjects for {} reviews".format(i)
+    print("Extracted subjects for {} reviews".format(i))

@@ -1,16 +1,14 @@
+from __future__ import print_function
+
 from hashlib import sha1
-from os import path, makedirs
+from os import path, makedirs, unlink
 
 from json import load, loads
 
 
 _PATH = path.join(path.abspath(path.dirname(__file__)), '..', '_cache')
 
-
-class CacheMiss(Exception):
-    pass
-
-GERRIT_MAGIC_JSON_PREFIX = ")]}\'\n"
+GERRIT_MAGIC_JSON_PREFIX = b")]}\'\n"
 
 
 def get_or_call(url, func, cache_only=False):
@@ -23,11 +21,14 @@ def get_or_call(url, func, cache_only=False):
     if path.exists(cache_path):
         with open(cache_path) as cached_file:
             try:
-                return load(cached_file)
+                json = load(cached_file)
+                if not json:
+                    unlink(cache_path)
+                return json
             except Exception:
                 raise Exception("Invalid JSON cached:", cached_file)
     elif cache_only:
-        raise CacheMiss
+        return []
 
     result = func(url)
     content = result.text.encode('utf-8')
@@ -37,14 +38,19 @@ def get_or_call(url, func, cache_only=False):
 
     ensure_directory(cache_dir)
 
-    with open(cache_path, 'w+') as cache_file:
-        cache_file.write(content)
+    json = loads(content.decode())
 
-    return loads(content)
+    if json:
+        with open(cache_path, 'wb+') as cache_file:
+            cache_file.write(content)
+    else:
+        print("Not caching empty result...")
+
+    return json
 
 
 def unique_alphanum(string):
-    return str(sha1(string).hexdigest())[:8]
+    return str(sha1(string.encode("utf-8")).hexdigest())[:8]
 
 
 def ensure_directory(directory):

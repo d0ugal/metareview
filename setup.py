@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-    name="review_analysis",
+    name="metareview",
     version="0.0.1",
     url="http://",
     license="MIT",
@@ -13,7 +13,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'review_analysis = review_analysis.cli:cli',
+            'metareview = metareview.cli:cli',
         ],
     },
     classifiers=[

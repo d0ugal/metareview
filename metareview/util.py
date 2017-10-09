@@ -11,12 +11,12 @@ _PATH = path.join(path.abspath(path.dirname(__file__)), '..', '_cache')
 GERRIT_MAGIC_JSON_PREFIX = b")]}\'\n"
 
 
-def get_or_call(url, func, cache_only=False):
+def get_or_call(key, url, func, cache_only=False):
 
-    key = unique_alphanum(url)
-    part_key = key[:2]
+    padded = "0000" + key
+    part_key = padded[-4:-2], padded[-2:]
     cache_dir = path.join(_PATH, "/".join(part_key))
-    cache_path = path.join(_PATH, "/".join(part_key), key)
+    cache_path = path.join(_PATH, cache_dir, f'{key}.json')
 
     if path.exists(cache_path):
         with open(cache_path) as cached_file:
@@ -36,21 +36,16 @@ def get_or_call(url, func, cache_only=False):
     if content.startswith(GERRIT_MAGIC_JSON_PREFIX):
         content = content[len(GERRIT_MAGIC_JSON_PREFIX):]
 
-    ensure_directory(cache_dir)
-
     json = loads(content.decode())
 
     if json:
+        ensure_directory(cache_dir)
         with open(cache_path, 'wb+') as cache_file:
             cache_file.write(content)
     else:
         print("Not caching empty result...")
 
     return json
-
-
-def unique_alphanum(string):
-    return str(sha1(string.encode("utf-8")).hexdigest())[:8]
 
 
 def ensure_directory(directory):

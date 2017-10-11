@@ -1,3 +1,6 @@
+bokeh
 click
-retrace
+pendulum
 requests
+retrace
+pandas

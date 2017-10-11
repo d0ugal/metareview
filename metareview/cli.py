@@ -3,6 +3,7 @@ from __future__ import print_function
 import click
 
 from metareview.gerrit import Gerrit
+from metareview.graph import generate_all
 
 
 @click.group()
@@ -30,3 +31,10 @@ def warm_cache(verbose, end, start, limit):
         return
 
     print ("Warmed the cache for %s reviews" % i)
+
+
+@cli.command()
+def graph_gen():
+
+    gerrit = Gerrit(cache_only=True, end=99000)
+    generate_all(gerrit)

@@ -11,3 +11,5 @@ site/
 run.sh
 output
 .ipynb_checkpoints
+htmlcov/
+.cache

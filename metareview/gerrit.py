@@ -22,17 +22,16 @@ CHANGES_URL = ("https://review.openstack.org"
 
 class Gerrit(object):
 
-    def __init__(self, cache_only=False, verbose=False, start=1, end=None):
-        self.url = 'https://review.openstack.org'
+    def __init__(self, cache_only=False, start=1, end=None,
+                 requester=requests.get):
         self.start = start
         self.end = end
-        self.verbose = verbose
         self.cache_only = cache_only
-        self.gerrit = requests.get
+        self.requester = requester
 
     @retry(limit=20, interval=time.sleep)
     def _get(self, key, url):
-        return get_or_call(key, url, self.gerrit, self.cache_only)
+        return get_or_call(key, url, self.requester, self.cache_only)
 
     def _url_generator(self):
         for i in count(start=self.start):

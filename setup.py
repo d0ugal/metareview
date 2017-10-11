@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name="metareview",
@@ -9,6 +9,7 @@ setup(
     long_description="",
     author="Dougal Matthews",
     author_email="dougal@dougalmatthews.com",
+    packages=find_packages(),
     install_requires=[
     ],
     entry_points={

@@ -1,9 +1,12 @@
 from __future__ import print_function
 
+import asyncio
+
 import click
 
 from metareview.gerrit import Gerrit
 from metareview.graph import generate_all
+from metareview.utils import cache_warmer
 
 
 @click.group()
@@ -12,29 +15,13 @@ def cli():
 
 
 @cli.command()
-@click.option('--verbose', is_flag=True, default=False)
-@click.option('--limit', type=int)
-@click.option('--start', type=int, default=1)
 @click.option('--end', type=int)
-def warm_cache(verbose, end, start, limit):
-    """
-    Download all of the datas.
-    """
-    gerrit = Gerrit(verbose=verbose, start=start, end=end)
-
-    for i, _ in enumerate(gerrit.reviews(), start=1):
-        if i == limit:
-            break
-        continue
-    else:
-        print("No reviews? start={},end={},limit={}".format(start, end, limit))
-        return
-
-    print ("Warmed the cache for %s reviews" % i)
+def warm_cache(end):
+    cache_warmer.start(end=end)
 
 
 @cli.command()
-def graph_gen():
-
-    gerrit = Gerrit(cache_only=True, end=99000)
+@click.option('--end', type=int)
+def graph_gen(end):
+    gerrit = Gerrit(end=end)
     generate_all(gerrit)

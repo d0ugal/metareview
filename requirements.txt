@@ -4,3 +4,4 @@ pendulum
 requests
 retrace
 pandas
+aiohttp

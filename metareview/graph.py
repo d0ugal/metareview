@@ -19,6 +19,7 @@ def generate_all(gerrit):
             date_string = review['created']
             dt = pendulum.parse(date_string)
             month = datetime.datetime(dt.year, dt.month, 1)
+            counter[month] += 1
             if 'submitted' in review:
                 dts = pendulum.parse(review['submitted'])
                 d = (dts - dt).seconds
@@ -28,11 +29,10 @@ def generate_all(gerrit):
                 print(key, str(value)[:20])
             print(review.keys())
             return
-        counter[month] += 1
 
     summed = {k: sum(v) / len(v) for k, v in duration.items()}
 
-    data = sorted(summed.items())
+    data = sorted(counter.items())
     df = pandas.DataFrame(data, columns=['Date', 'Review Count'])
     print(df)
 

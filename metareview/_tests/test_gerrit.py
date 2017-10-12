@@ -5,7 +5,7 @@ from metareview import gerrit
 def test_get_reviews():
 
     mock_request = mock.Mock()
-    api = gerrit.Gerrit(requester=mock_request, end=10, cache_only=True)
+    api = gerrit.Gerrit(end=10)
 
     reviews = list(api.reviews())
 

@@ -5,3 +5,5 @@ requests
 retrace
 pandas
 aiohttp
+selenium
+pillow
